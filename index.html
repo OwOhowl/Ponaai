@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<script>
+  window.onerror = function(msg, url, line) {
+    alert("VIRHE: " + msg +"\nTIEDOSTO: " + (url ? url.split('/').pop() : 'inline') + "\nRIVILLÄ: " + line);
+  };
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#050b14">
+<title>PonaAI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">P</div>
+    <div><b>PonaAI</b><small id="modelTag">Gemini 3.8 Flash</small></div>
+  </div>
+<div class="top-actions">
+  <button class="icon" id="projectBtn" title="Projektit">
+    <i class="fa-solid fa-folder"></i>
+  </button>
+
+  <button class="icon saved-btn" id="savedBtn" title="Tallennetut">
+    <i class="fa-solid fa-folder-open"></i>
+    <span>TALLENNETUT</span>
+  </button>
+
+  <button class="icon" id="settingsBtn" title="Asetukset">
+    <i class="fa-solid fa-gear"></i>
+  </button>
+</div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="chat"><i class="fa-solid fa-comments"></i> Chat</button>
+  <button class="tab" data-tab="media"><i class="fa-solid fa-wand-magic-sparkles"></i> Media</button>
+  <button class="tab" data-tab="vision"><i class="fa-solid fa-camera"></i> Kamera</button>
+  <button class="tab" data-tab="games"><i class="fa-solid fa-gamepad"></i> Pelit</button>
+</nav>
+
+<main>
+<section class="page active" id="page-chat">
+  <div class="status">
+    <div class="avatar-wrap">
+      <canvas id="face" width="88" height="88"></canvas>
+      <div><b id="aiName">PonaAI</b><small id="moodText">Moodi: rauhallinen</small></div>
+    </div>
+    <div class="status-right">
+      <span id="emotion">😌 Rauhallinen</span>
+      <span id="thinkingState" class="thinking-state">Valmis</span>
+    </div>
+  </div>
+
+  <div id="chat" class="chat"></div>
+
+  <div id="thinkingBox" class="thinking-box hidden">
+    <div class="thinking-head">
+      <span><i class="fa-solid fa-brain"></i> Ajattelun yhteenveto</span>
+      <button id="clearThinking" class="mini">Tyhjennä</button>
+    </div>
+    <div id="thinkingText"></div>
+  </div>
+
+  <div class="composer">
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <button class="action" id="voiceCallBtn" style="margin:0; flex:1;">
+        <i class="fa-solid fa-phone"></i> Aloita äänipuhelu
+      </button>
+    </div>
+    <div id="attachments" class="attachments"></div>
+    <div class="compose-row">
+      <button class="icon" id="attachBtn"><i class="fa-solid fa-paperclip"></i></button><input id="fileInput" type="file" multiple hidden>
+      <button class="icon" id="micBtn"><i class="fa-solid fa-microphone"></i></button>
+      <textarea id="input" rows="1" placeholder="Kirjoita PonaAI:lle..."></textarea>
+      <button class="send" id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="page-media">
+  <div class="scroll">
+    <div class="card">
+      <h3><i class="fa-solid fa-image"></i> Kuvan luonti / editointi</h3>
+      <label>Malli</label>
+      <select id="imageModel">
+        <option value="gemini-3.1-flash-image">Gemini 3.1 Flash Image</option>
+        <option value="gemini-3.1-flash-lite-image">Gemini 3.1 Flash Lite Image</option>
+        <option value="gemini-3-pro-image">Gemini 3 Pro Image</option>
+        <option value="diffusion-gemma">DiffusionGemma</option>
+      </select>
+      <label>Prompti</label>
+      <textarea id="imagePrompt" rows="4" placeholder="Mitä tehdään?"></textarea>
+      <button class="action" id="imageBtn">Generoi kuva</button>
+      <div id="mediaResult"></div>
+    </div>
+
+    <div class="card">
+      <h3><i class="fa-solid fa-music"></i> Musiikki</h3>
+      <select id="musicModel">
+        <option value="lyria-3-pro-preview">Lyria 3 Pro (Full-Song)</option>
+        <option value="lyria-3-clip-preview">Lyria 3 (Song Clips)</option>
+        <option value="lyria-2">Lyria 2</option>
+      </select>
+      <textarea id="musicPrompt" rows="3" placeholder="Esim. synkkä drift-musiikki, äänetön intro..."></textarea>
+      <button class="action" id="musicBtn">Generoi musiikki</button>
+      <div id="musicResult"></div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="page-vision">
+  <div class="scroll">
+    <div class="card">
+      <h3><i class="fa-solid fa-video"></i> Kamera</h3>
+      <video id="camera" autoplay playsinline muted></video>
+      <div class="button-row">
+        <button class="action" id="cameraStart">Käynnistä kamera</button>
+        <button class="action danger" id="cameraStop">Lopeta</button>
+      </div>
+      <button class="action" id="cameraAnalyze">Analysoi kuva PonaAI:lla</button>
+      <div id="visionResult"></div>
+    </div>
+    <div class="card">
+      <h3><i class="fa-solid fa-microphone-lines"></i> Puhe</h3>
+      <p class="muted">Chatin mikrofoni käyttää selaimen/Android WebView'n puheentunnistusta.</p>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="page-games">
+  <div class="game-toolbar">
+    <b>HTML5-pelitestaaja</b>
+    <button class="action small" id="runGame">Suorita</button>
+  </div>
+  <iframe id="gameFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
+</section>
+</main>
+
+<div class="modal" id="settingsModal">
+  <div class="modal-card">
+    <div class="modal-head"><h2>Asetukset</h2><button class="icon close">×</button></div>
+    
+    <label>Päämalli</label>
+<select id="mainModel">
+  <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
+  <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
+  <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
+  <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
+  <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
+</select>
+
+    <label>Ajattelun taso</label>
+<select id="thinkingLevel">
+  <option value="low">Low — nopea</option>
+  <option value="medium">Medium — normaali</option>
+  <option value="high">High — perusteellinen</option>
+</select>
+
+    <label>PonaAI:n persoona</label>
+<select id="personality">
+  <option value="sarcastic">Sarkastinen</option>
+  <option value="friendly">Ystävällinen</option>
+  <option value="developer">Developer</option>
+  <option value="calm">Rauhallinen</option>
+    <option value="human">Aito ihminen (Tunteet & Inhimillisyys)</option>
+</select>
+
+<label>Sisältörajoitukset</label>
+<select id="blockLevel">
+  <option value="none">None — ei PonaAI:n omia ylimääräisiä rajoituksia</option>
+  <option value="low">Low — tiukempi</option>
+  <option value="medium">Medium — normaali</option>
+  <option value="high">High — vapaa</option>
+  <option value="extreme">Extreme — erittäin vapaa</option>
+</select>
+
+<div class="tiny muted">
+  None poistaa vain PonaAI:n omat ylimääräiset sisältörajoitukset.
+  Googlen/Vertex AI:n omat turvallisuussäännöt ovat edelleen voimassa.
+</div>
+
+<div class="settings-section">
+  <div class="settings-section-title">
+    👤 Omat tiedot
+  </div>
+
+  <label>Nimi</label>
+  <input
+    id="profileName"
+    type="text"
+    placeholder="Nimesi"
+    autocomplete="name"
+  >
+
+  <label>PonaAI:n nimi</label>
+  <input
+    id="profileAiName"
+    type="text"
+    placeholder="PonaAI"
+  >
+
+  <label>Tietoa minusta</label>
+  <textarea
+    id="profileAbout"
+    rows="4"
+    placeholder="Kerro PonaAI:lle asioita, jotka sen kannattaa tietää sinusta."
+  ></textarea>
+
+  <label>Pysyvät ohjeet PonaAI:lle</label>
+  <textarea
+    id="profileInstructions"
+    rows="5"
+    placeholder="Esimerkiksi: Vastaa minulle aina suoraan ja käytännöllisesti."
+  ></textarea>
+</div>
+
+<button class="action" id="saveSettings">
+  Tallenna
+</button>
+  </div>
+</div>
+
+<div class="modal" id="projectsModal">
+  <div class="modal-card">
+    <div class="modal-head"><h2>Projektit</h2><button class="icon close">×</button></div>
+    <div id="projects"></div>
+    <button class="action" id="newProject">+ Uusi projekti</button>
+  </div>
+</div>
+
+<div class="modal saved-modal" id="savedModal">
+  <div class="modal-card">
+
+    <div class="modal-head">
+      <h2>📁 Tallennetut</h2>
+      <button class="icon close" id="closeSaved">×</button>
+    </div>
+
+    <div id="savedProjectName" class="muted"></div>
+
+    <div id="savedList" class="saved-list"></div>
+
+  </div>
+</div>
+
+<script type="module" src="app.js?v=10"></script>
+</body>
+</html>
