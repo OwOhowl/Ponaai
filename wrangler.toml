@@ -56,11 +56,7 @@ const credentials = {
 ============================================================
 */
 
-// ↓↓↓ LIITÄ SUN NYKYINEN credentials-OBJEKTI TÄHÄN ↓↓↓
-
-      const credentials = {
-        client_email: "vertex-express@ponaai-a6168.iam.gserviceaccount.com",
-        private_key: `-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDJvFy5eiegCDF4\nNhMe18+Dla4X/qjiZXAHCDf2/H1jES2TQOpwb3STMyGo3alIat9JgepB/1lcZJ2m\n2b4KCpmDCtv0BD+oqe/CrvZLUvhEB8zOlExH+FHsBe0rlR7/KmTM+7dqwn8VKIZS\nPacJKum4AJl1ZkZkSyfkVuRrv/vcic5fNAQ4QBsh7cn1QtTFvN9aG1N5+ckzHrmY\nC4IiVPgkdk/Wj+m2apw3hun/i0bOhUgK9Yx3wsfdaSI0MkocdtGA5X4ZQ0cqDhvx\nLcDsP/HZTdWjixRgMub4sUyGuolPtKO45H9aXOxp87F9OMviWd5a38lyKzx0e0QG\n9jmeLuSLAgMBAAECggEADrGG7QXmFievarqnJxG/wWBikmIJbP8uBLHnJmv6uf98\n57Yy6fn3bk1E5o0wKka8337BHQnhn8AlJD6RzLg7uPa06vYJ3CZ2GlXIbKR50ekV\nISrEaS2Ma5N9VDWDt3QgBjbptuXwGag4K4wZoXccGAg7JSwY2zwG7ZocMwwds4Ql\nrseSSsVpmyrEEwRbUGSYlEf5PqlZmCZdqY3Rtzr7NEYxm7fLg4gnw75KxTrm5F6X\nCkd3T2sZlwP0mrBk/VX1l0nYbn3gRAUadKkXfvw0DACQEKbScNLPWGUsAqm/Jm68\nvYX8xgpBj+NTfz/NMONTeLclE2/+2DOIgycqH8aUgQKBgQDvFDQoNyo8onxv/rIl\nTECGSFQFrXS1iqT4FP865suwBgNsBQLr9cYDjgDVP3sHb5TRpemiJxIo0izEvOyR\nd0i7s+6KPoOI5zxPa02m5rpNX65vw4yDABYOANt/RkIzxoR0bZExqZbW2yoGVnX3\n2ykJ8iyz5jxjDYl7KYMblQWWSwKBgQDYA4zJLtkeIE2/zvZ1XPsGVbhgi9d4xIxH\nfDuF5E5s+0npaV4uSAYwIYj+EZa21ZvKQijYG8RK4XMnKv/C6fKlHs2LGJGJlHfj\nfU7cnEhqiEjjZt7bRp/u1p7v+ykGSuLk1JHf183yQtpZNIyuQbTDVK8Kd62kDPbf\nmYnfveQCwQKBgQCQM6Z17zgZlIPr5Tq8Rm7Qz8VmG0Y+zZ5NSBTeCSEoTag4uhkW\nC4rg0ADunrhtNr8TaLgvptNMLeD01WL3JnSHSrMBTU13AMoeuQEAP0B1tNV48gDJ\nbv7eeWPrM4xwwDdaJlAiHUEu3MhPRE0pL1Zkel6+L4uSzzJySAqdU1goWwKBgQCT\nn7lzNCUFRaZc0x/zjRuwdJyQvoD+87O6lthG5IQETqdwcKYAkxBHjGOG3pZVVR4m\n15f6ON+pHPIJboVju2YsGiT2TlAH6gMU4OooMlX7GDBX2FGtIVLjcqEj+E1NE5iE\nMhGPHHiOe8mk9Ri/bgAPDayiRq/QUVvV66Qh2DAfAQKBgQCPvBNzOBnfpiYgpWif\nMHi3Is9gB3GvTT7gE40741LGje6t/9k3wliYyDHdYyV3f7hQ7cUXujzlfRowaZAp\Z7nh+1ytsAoYWXlLKJrTRVBQeY+ntsJDDPcbqaHk7/8Rb/RkO3NHrc+9Dhsf9gpc\n4H3yf9H07LhIqTJfdUKkudRYuQ==\n-----END PRIVATE KEY-----`
+// ↓↓↓ LIITÄ ==\n-----END PRIVATE KEY-----`
       };
 
 // ↑↑↑ MUUTA VAIN TÄMÄN KOHDAN PRIVATE KEY OMAKSESI ↑↑↑
