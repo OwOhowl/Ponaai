@@ -3834,48 +3834,35 @@ document
 // ============================================================
 // BUTTONS
 // ============================================================
+// BUTTONS
+// ============================================================
 
-$("sendBtn").onclick =
-  send;
+const sendBtn = $("sendBtn");
+if (sendBtn) sendBtn.onclick = send;
 
-$("input").addEventListener(
-  "keydown",
-  e => {
-    if (
-      e.key === "Enter" &&
-      !e.shiftKey
-    ) {
+const chatInput = $("input");
+if (chatInput) {
+  chatInput.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey){
       e.preventDefault();
       send();
     }
-  }
-);
+  });
+}
 
-$("attachBtn").onclick =
-  () =>
-    $("fileInput").click();
+const attachBtn =$("attachBtn");
+const fileInput = $("fileInput");
 
-$("fileInput").onchange =
-  e => {
-    files =
-      [
-        ...e.target.files
-      ].slice(
-        0,
-        30
-      );
+if (attachBtn && fileInput) {attachBtn.onclick = () => fileInput.click();
 
-    $("attachments")
-      .innerHTML =
-      files
-        .map(
-          f =>
-            `<span class="chip">
-              ${esc(f.name)}
-            </span>`
-        )
+  fileInput.onchange = e => {files = [...e.target.files].slice(0, 30);
+    const attachmentsEl= $("attachments");
+    if (attachmentsEl) {
+      attachmentsEl.innerHTML = files
+        .map(f=> `<span class="chip">${esc(f.name)}</span>`)
         .join("");
-  };
+    }};
+}
 
 // ============================================================
 // TTS STOP BUTTON
