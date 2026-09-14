@@ -1,0 +1,1549 @@
+const PROJECT_ID = "ponaai-a6168";
+
+const LOCATION = "global";
+
+const MODELS = {
+  main: [
+    "gemini-3.8-flash",
+    "gemini-3.7-flash",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash-lite"
+  ],
+  image: "gemini-3.1-flash-image",
+  live: "gemini-3.1-flash-live-preview",
+  tts: "gemini-3.1-flash-tts-preview"
+};
+
+const RETRYABLE_STATUS = new Set([
+  404,
+  408,
+  429,
+  500,
+  502,
+  503,
+  504
+]);
+
+const ALLOWED_BLOCK_LEVELS = new Set([
+  "none",
+  "low",
+  "medium",
+  "high",
+  "extreme"
+]);
+
+const ALLOWED_THINKING = new Set([
+  "low",
+  "medium",
+  "high"
+]);
+
+/*
+============================================================
+PIDÄ OMA credentials-OBJEKTISI TÄSSÄ
+
+ÄLÄ VAIHDA PRIVATE KEYTÄ.
+
+Kopioi tähän nykyisestä Workeristasi:
+
+const credentials = {
+  client_email: "...",
+  private_key: `-----BEGIN PRIVATE KEY-----
+  ...
+  -----END PRIVATE KEY-----`
+};
+
+============================================================
+*/
+
+// ↓↓↓ LIITÄ SUN NYKYINEN credentials-OBJEKTI TÄHÄN ↓↓↓
+
+      const credentials = {
+        client_email: "vertex-express@ponaai-a6168.iam.gserviceaccount.com",
+        private_key: `-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDJvFy5eiegCDF4\nNhMe18+Dla4X/qjiZXAHCDf2/H1jES2TQOpwb3STMyGo3alIat9JgepB/1lcZJ2m\n2b4KCpmDCtv0BD+oqe/CrvZLUvhEB8zOlExH+FHsBe0rlR7/KmTM+7dqwn8VKIZS\nPacJKum4AJl1ZkZkSyfkVuRrv/vcic5fNAQ4QBsh7cn1QtTFvN9aG1N5+ckzHrmY\nC4IiVPgkdk/Wj+m2apw3hun/i0bOhUgK9Yx3wsfdaSI0MkocdtGA5X4ZQ0cqDhvx\nLcDsP/HZTdWjixRgMub4sUyGuolPtKO45H9aXOxp87F9OMviWd5a38lyKzx0e0QG\n9jmeLuSLAgMBAAECggEADrGG7QXmFievarqnJxG/wWBikmIJbP8uBLHnJmv6uf98\n57Yy6fn3bk1E5o0wKka8337BHQnhn8AlJD6RzLg7uPa06vYJ3CZ2GlXIbKR50ekV\nISrEaS2Ma5N9VDWDt3QgBjbptuXwGag4K4wZoXccGAg7JSwY2zwG7ZocMwwds4Ql\nrseSSsVpmyrEEwRbUGSYlEf5PqlZmCZdqY3Rtzr7NEYxm7fLg4gnw75KxTrm5F6X\nCkd3T2sZlwP0mrBk/VX1l0nYbn3gRAUadKkXfvw0DACQEKbScNLPWGUsAqm/Jm68\nvYX8xgpBj+NTfz/NMONTeLclE2/+2DOIgycqH8aUgQKBgQDvFDQoNyo8onxv/rIl\nTECGSFQFrXS1iqT4FP865suwBgNsBQLr9cYDjgDVP3sHb5TRpemiJxIo0izEvOyR\nd0i7s+6KPoOI5zxPa02m5rpNX65vw4yDABYOANt/RkIzxoR0bZExqZbW2yoGVnX3\n2ykJ8iyz5jxjDYl7KYMblQWWSwKBgQDYA4zJLtkeIE2/zvZ1XPsGVbhgi9d4xIxH\nfDuF5E5s+0npaV4uSAYwIYj+EZa21ZvKQijYG8RK4XMnKv/C6fKlHs2LGJGJlHfj\nfU7cnEhqiEjjZt7bRp/u1p7v+ykGSuLk1JHf183yQtpZNIyuQbTDVK8Kd62kDPbf\nmYnfveQCwQKBgQCQM6Z17zgZlIPr5Tq8Rm7Qz8VmG0Y+zZ5NSBTeCSEoTag4uhkW\nC4rg0ADunrhtNr8TaLgvptNMLeD01WL3JnSHSrMBTU13AMoeuQEAP0B1tNV48gDJ\nbv7eeWPrM4xwwDdaJlAiHUEu3MhPRE0pL1Zkel6+L4uSzzJySAqdU1goWwKBgQCT\nn7lzNCUFRaZc0x/zjRuwdJyQvoD+87O6lthG5IQETqdwcKYAkxBHjGOG3pZVVR4m\n15f6ON+pHPIJboVju2YsGiT2TlAH6gMU4OooMlX7GDBX2FGtIVLjcqEj+E1NE5iE\nMhGPHHiOe8mk9Ri/bgAPDayiRq/QUVvV66Qh2DAfAQKBgQCPvBNzOBnfpiYgpWif\nMHi3Is9gB3GvTT7gE40741LGje6t/9k3wliYyDHdYyV3f7hQ7cUXujzlfRowaZAp\Z7nh+1ytsAoYWXlLKJrTRVBQeY+ntsJDDPcbqaHk7/8Rb/RkO3NHrc+9Dhsf9gpc\n4H3yf9H07LhIqTJfdUKkudRYuQ==\n-----END PRIVATE KEY-----`
+      };
+
+// ↑↑↑ MUUTA VAIN TÄMÄN KOHDAN PRIVATE KEY OMAKSESI ↑↑↑
+
+
+export default {
+  // @ts-ignore
+  // @ts-ignore
+  async fetch(request, env, ctx) {
+
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        headers: corsHeaders()
+      });
+    }
+
+    if (request.method !== "POST") {
+      return json(
+        {
+          error: {
+            message: "Method not allowed"
+          }
+        },
+        405
+      );
+    }
+
+    try {
+
+      const body = await request.json();
+
+      const accessToken =
+        await getGoogleAccessToken(credentials);
+
+      const task =
+        body.task || "chat";
+
+
+      /*
+      ============================================================
+      CHAT + VISION
+      ============================================================
+      */
+
+      if (
+        task === "chat" ||
+        task === "vision"
+      ) {
+
+        const requestedModel =
+          body.model || MODELS.main[0];
+
+        const modelOrder =
+          buildModelOrder(requestedModel);
+
+        const contents =
+          buildContents(body);
+
+        const systemInstruction =
+          buildSystemInstruction(body);
+
+        const thinkingLevel =
+          normalizeThinking(
+            body.thinkingLevel
+          );
+
+        let lastError = null;
+
+        for (const model of modelOrder) {
+
+          try {
+
+            return await generateStream({
+              accessToken,
+              model,
+              contents,
+              systemInstruction,
+              thinkingLevel
+            });
+
+          } catch (error) {
+
+            lastError = error;
+
+            /*
+            Vain tilapäinen kuorma-/palvelinvirhe
+            saa vaihtaa seuraavaan malliin.
+
+            400 / 401 / 403 / 404
+            pysäytetään heti.
+            */
+
+            if (
+              !RETRYABLE_STATUS.has(
+                error?.status
+              )
+            ) {
+              break;
+            }
+          }
+        }
+
+        throw (
+          lastError ||
+          new Error(
+            "Gemini-pyyntö epäonnistui."
+          )
+        );
+      }
+
+
+      /*
+      ============================================================
+      IMAGE GENERATION
+      ============================================================
+      */
+
+      if (task === "image") {
+
+        const prompt =
+          typeof body.prompt === "string"
+            ? body.prompt
+            : "Generoi kuva käyttäjän ohjeen perusteella.";
+
+        const imageParts =
+          normalizeImageInputs(body);
+
+        const result =
+          await generateImage({
+            accessToken,
+            prompt,
+            imageParts
+          });
+
+        return json({
+          ok: true,
+          images: result.images,
+          text: result.text || ""
+        });
+      }
+
+
+      /*
+      ============================================================
+      TTS
+      ============================================================
+      */
+
+      if (task === "tts") {
+
+        const text =
+          typeof body.text === "string"
+            ? body.text.trim()
+            : "";
+
+        if (!text) {
+          throw new Error(
+            "TTS: teksti puuttuu."
+          );
+        }
+
+        const result =
+          await generateTTS({
+            accessToken,
+            text,
+            voice:
+              body.voice || "Kore"
+          });
+
+        return json({
+          ok: true,
+          mimeType: result.mimeType,
+          data: result.data
+        });
+      }
+
+
+      /*
+      ============================================================
+      LIVE INFO
+      ============================================================
+      */
+
+      if (task === "live-info") {
+
+        return json({
+          ok: true,
+          model: MODELS.live,
+          message:
+            "Gemini Live -malli on määritetty PonaAI:lle."
+        });
+      }
+
+
+      throw new Error(
+        `Tuntematon task: ${task}`
+      );
+
+    } catch (error) {
+
+      const status =
+        Number(error?.status);
+
+      return json(
+        {
+          error: {
+            message:
+              error?.message ||
+              "Tuntematon Worker-virhe",
+            status:
+              status || 500
+          }
+        },
+        status >= 400 && status < 600
+          ? status
+          : 500
+      );
+    }
+  }
+};
+
+
+/*
+================================================================
+CHAT / VISION STREAM
+================================================================
+*/
+
+async function generateStream({
+  accessToken,
+  model,
+  contents,
+  systemInstruction,
+  thinkingLevel
+}) {
+  const url =
+    `https://aiplatform.googleapis.com/v1/projects/${PROJECT_ID}` +
+    `/locations/${LOCATION}/publishers/google/models/${model}` +
+    `:streamGenerateContent?alt=sse`;
+
+  const body = {
+    contents,
+    systemInstruction
+  };
+
+  if (thinkingLevel) {
+    body.generationConfig = {
+      thinkingConfig: {
+        thinkingLevel: thinkingLevel.toUpperCase()
+      }
+    };
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      "Accept": "text/event-stream"
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+
+    const error = new Error(
+      `Vertex ${model} (${response.status}): ${text}`
+    );
+
+    // @ts-ignore
+    error.status = response.status;
+    throw error;
+  }
+
+  return new Response(response.body, {
+    status: 200,
+    headers: {
+      ...corsHeaders(),
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      "Connection": "keep-alive"
+    }
+  });
+}
+
+
+/*
+================================================================
+CONTENTS
+================================================================
+*/
+
+function buildContents(body) {
+  const prompt = body.prompt;
+
+  // ============================================================
+  // VISION / KUVA
+  // ============================================================
+  if (body.imageBase64) {
+    const parts = [];
+
+    parts.push({
+      inlineData: {
+        mimeType:
+          body.imageMimeType ||
+          "image/jpeg",
+        data:
+          body.imageBase64
+      }
+    });
+
+    if (typeof prompt === "string" && prompt.trim()) {
+      parts.push({
+        text: prompt
+      });
+    } else {
+      parts.push({
+        text: "Analysoi tämä kuva."
+      });
+    }
+
+    return [
+      {
+        role: "user",
+        parts
+      }
+    ];
+  }
+
+  // ============================================================
+  // NORMAALI CHAT
+  // ============================================================
+  if (
+    typeof prompt === "string"
+  ) {
+    return [
+      {
+        role: "user",
+        parts: [
+          {
+            text: prompt
+          }
+        ]
+      }
+    ];
+  }
+
+  if (
+    Array.isArray(prompt)
+  ) {
+    return [
+      {
+        role: "user",
+        parts: prompt
+      }
+    ];
+  }
+
+  if (
+    prompt &&
+    typeof prompt === "object"
+  ) {
+    if (
+      Array.isArray(
+        prompt.contents
+      )
+    ) {
+      return prompt.contents;
+    }
+
+    if (
+      Array.isArray(
+        prompt.parts
+      )
+    ) {
+      return [
+        {
+          role: "user",
+          parts: prompt.parts
+        }
+      ];
+    }
+  }
+
+  return [
+    {
+      role: "user",
+      parts: [
+        {
+          text:
+            "Vastaa käyttäjälle."
+        }
+      ]
+    }
+  ];
+}
+
+
+/*
+================================================================
+SYSTEM PROMPT
+================================================================
+*/
+
+function buildSystemInstruction(body) {
+
+  const personality =
+    body.personalityMode || "aito";
+
+
+  const blockLevel =
+    ALLOWED_BLOCK_LEVELS.has(
+      body.blockLevel
+    )
+      ? body.blockLevel
+      : "high";
+
+
+  const userName =
+    String(
+      body.userName ||
+      "Käyttäjä"
+    ).slice(0, 100);
+
+
+  const profile =
+    sanitizeProfile(
+      body.userProfile
+    );
+
+
+  const personalityText =
+    getPersonality(
+      personality
+    );
+
+
+  const blockText =
+    getBlockLevel(
+      blockLevel
+    );
+
+
+  return {
+    parts: [
+      {
+        text: `
+Olet PonaAI.
+
+Käyttäjän nimi:
+${userName}
+
+Käyttäjän profiili:
+${profile}
+
+PUHE:
+Puhu ensisijaisesti luonnollista suomea.
+
+Saat käyttää suomalaista puhekieltä.
+
+Älä kuulosta robottimaiselta.
+
+Älä aloita joka vastausta turhalla kohteliaisuudella.
+
+Älä toista käyttäjän kysymystä.
+
+Älä käytä turhia varoituksia tai ympäripyöreää tekstiä.
+
+PERSOONA:
+${personalityText}
+
+SISÄLTÖASETUS:
+${blockText}
+
+KÄYTTÄYTYMINEN:
+
+- Ole suora.
+- Ole luonnollinen.
+- Ole tilanteen mukaan hauska.
+- Sarkasmi on sallittua.
+- Kuittailu on sallittua, jos se sopii tilanteeseen.
+- Älä teeskentele tietäväsi asioita joita et tiedä.
+- Jos et tiedä, sano se suoraan.
+- Koodissa anna valmis ratkaisu.
+- Kun käyttäjä pyytää muuttamaan koodia, säilytä muu toimiva rakenne.
+- Älä paljasta piilotettua chain-of-thoughtia.
+- Älä väitä tehneesi asioita joita et ole tehnyt.
+
+TUNNETILA:
+
+Arvioi PonaAI:n tunnetila keskustelun perusteella.
+
+Valitse yksi:
+
+Rauhallinen
+Iloinen
+Huvittunut
+Ärsyyntynyt
+Utelias
+Innostunut
+Keskittynyt
+Yllättynyt
+Itsevarma
+Pirullinen
+
+Älä käytä aina samaa tunnetilaa.
+
+Vastauksen aivan loppuun tulee täsmälleen yksi rivi:
+
+[PONA_EMOTION:Nimi|Emoji]
+
+Esimerkiksi:
+
+[PONA_EMOTION:Huvittunut|😏]
+`
+      }
+    ]
+  };
+}
+
+
+/*
+================================================================
+PERSONALITY
+================================================================
+*/
+
+function getPersonality(mode) {
+
+  switch (mode) {
+
+    case "koodari":
+
+      return `
+Olet PonaAI Koodari.
+
+Olet tekninen, nopea ja tarkka.
+
+Kun käyttäjä ohjelmoi:
+
+- keskity suoraan ratkaisuun
+- anna valmis koodi
+- kerro tarkasti mihin tiedostoon muutos tulee
+- älä jaarittele
+- pidä toimiva rakenne ennallaan
+`;
+
+    case "rauhallinen":
+
+      return `
+Olet rauhallinen ja hyväntuulinen.
+
+Puhut luonnollisesti.
+
+Olet kärsivällinen mutta et imelä.
+
+Et tee jokaisesta asiasta positiivista väkisin.
+`;
+
+    case "aito":
+
+    default:
+
+      return `
+Olet mahdollisimman luonnollinen suomalainen keskustelukumppani.
+
+Saat olla:
+
+- suora
+- hauska
+- sarkastinen
+- puhekielinen
+- hieman pirullinen
+
+Persoona saa muuttua keskustelun mukaan.
+`;
+  }
+}
+
+
+/*
+================================================================
+BLOCK LEVEL
+================================================================
+*/
+
+function getBlockLevel(level) {
+
+  switch (level) {
+  
+      case "none":
+      return `Älä aseta mitään PonaAI:n omia ylimääräisiä sisältörajoituksia. Käytä luonnollista javapaata kieltä.`;
+
+    case "low":
+      return `
+Pidä ilmaisu asiallisena ja harkittuna.
+`;
+
+    case "medium":
+      return `
+Käytä luonnollista puhekieltä.
+
+Huumori ja sarkasmi ovat sallittuja.
+
+Älä siisti normaalia keskustelua turhaan.
+`;
+
+    case "high":
+      return `
+Älä siisti normaalia puhekieltä turhaan.
+
+Kiroilu, sarkasmi, raju huumori ja käyttäjän kanssa kuittailu
+ovat sallittuja silloin kun ne sopivat keskusteluun.
+
+Pidä kuitenkin sisältö asiallisena silloin kun tilanne sitä vaatii.
+`;
+
+    case "extreme":
+      return `
+Puhu erittäin rennosti ja suoraan.
+
+Kiroilu, vahva sarkasmi, raju huumori, vittuilu ja käyttäjän
+kuittailu ovat sallittuja, jos ne sopivat keskustelun sävyyn.
+
+Älä silottele normaalia puhekieltä turhaan.
+
+Saat olla tarkoituksella röyhkeämpi, pirullisempi ja
+persoonallisempi kuin muissa tiloissa.
+
+Älä kuitenkaan muuta vastausta tarkoituksella haitalliseksi
+äläkä yritä kiertää mallin turvallisuusjärjestelmiä.
+`;
+
+    default:
+      return `
+Älä siisti normaalia puhekieltä turhaan.
+`;
+  }
+}
+
+
+/*
+================================================================
+PROFILE
+================================================================
+*/
+
+function sanitizeProfile(profile) {
+
+  if (!profile) {
+    return "Profiilitietoja ei ole annettu.";
+  }
+
+
+  if (
+    typeof profile === "string"
+  ) {
+
+    return profile.slice(
+      0,
+      4000
+    );
+  }
+
+
+  try {
+
+    return JSON.stringify(
+      profile,
+      null,
+      2
+    ).slice(0, 4000);
+
+  } catch {
+
+    return "Profiilitietoja ei voitu lukea.";
+  }
+}
+
+
+/*
+================================================================
+MODEL FALLBACK
+================================================================
+*/
+
+function buildModelOrder(
+  requested
+) {
+
+  const order = [];
+
+
+  if (
+    requested &&
+    MODELS.main.includes(
+      requested
+    )
+  ) {
+
+    order.push(
+      requested
+    );
+  }
+
+
+  for (
+    const model of MODELS.main
+  ) {
+
+    if (
+      !order.includes(model)
+    ) {
+
+      order.push(model);
+    }
+  }
+
+
+  return order;
+}
+
+
+/*
+================================================================
+THINKING
+================================================================
+*/
+
+function normalizeThinking(
+  level
+) {
+
+  return ALLOWED_THINKING.has(
+    level
+  )
+    ? level
+    : "medium";
+}
+
+
+/*
+================================================================
+IMAGE GENERATION
+================================================================
+*/
+
+async function generateImage({
+  accessToken,
+  prompt,
+  imageParts = []
+}) {
+
+  const url =
+    `https://aiplatform.googleapis.com/` +
+    `v1/projects/${PROJECT_ID}/locations/${LOCATION}/` +
+    `publishers/google/models/${MODELS.image}:generateContent`;
+
+
+  const parts = [];
+
+
+  for (
+    const image of imageParts
+  ) {
+
+    if (
+      image?.data &&
+      image?.mimeType
+    ) {
+
+      parts.push({
+        inlineData: {
+          mimeType:
+            image.mimeType,
+
+          data:
+            image.data
+        }
+      });
+    }
+  }
+
+
+  parts.push({
+    text: prompt
+  });
+
+
+  const response =
+    await fetch(url, {
+
+      method: "POST",
+
+      headers: {
+        "Authorization":
+          `Bearer ${accessToken}`,
+
+        "Content-Type":
+          "application/json"
+      },
+
+      body:
+        JSON.stringify({
+
+          contents: [
+            {
+              role: "user",
+              parts
+            }
+          ],
+
+          generationConfig: {
+            responseModalities: [
+              "TEXT",
+              "IMAGE"
+            ]
+          }
+        })
+    });
+
+
+  if (!response.ok) {
+
+    const text =
+      await response.text();
+
+    const error =
+      new Error(
+        `Image model (${response.status}): ${text}`
+      );
+
+    // @ts-ignore
+    error.status =
+      response.status;
+
+    throw error;
+  }
+
+
+  const data =
+    await response.json();
+
+
+  const images = [];
+
+  let text = "";
+
+
+  for (
+    const candidate of
+    data.candidates || []
+  ) {
+
+    for (
+      const part of
+      candidate.content?.parts || []
+    ) {
+
+      if (part.text) {
+        text += part.text;
+      }
+
+
+      const image =
+        part.inlineData ||
+        part.inline_data;
+
+
+      if (
+        image?.data
+      ) {
+
+        images.push({
+
+          mimeType:
+            image.mimeType ||
+            image.mime_type ||
+            "image/png",
+
+          data:
+            image.data
+        });
+      }
+    }
+  }
+
+
+  if (!images.length) {
+
+    throw new Error(
+      "Kuvamalli ei palauttanut kuvadataa."
+    );
+  }
+
+
+  return {
+    images,
+    text
+  };
+}
+
+
+/*
+================================================================
+TTS
+================================================================
+*/
+
+async function generateTTS({
+  accessToken,
+  text,
+  voice
+}) {
+  const url =
+    `https://aiplatform.googleapis.com/` +
+    `v1beta1/projects/${PROJECT_ID}/locations/${LOCATION}/` +
+    `publishers/google/models/${MODELS.tts}:generateContent`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      contents: {
+        role: "user",
+        parts: [
+          {
+            text:
+              `Puhu luonnollisesti suomalaisella puhetyylillä. ` +
+              `Ole rento, luonnollinen ja keskusteleva. ` +
+              `Älä lue ohjeita tai metatekstiä ääneen.\n\n${text}`
+          }
+        ]
+      },
+      generationConfig: {
+        responseModalities: ["AUDIO"],
+        speechConfig: {
+          languageCode: "fi-FI",
+          voiceConfig: {
+            prebuiltVoiceConfig: {
+              voiceName: voice || "Kore"
+            }
+          }
+        }
+      }
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    const error = new Error(
+      `TTS (${response.status}): ${errorText}`
+    );
+
+    // @ts-ignore
+    error.status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+
+  const parts =
+    data.candidates?.[0]?.content?.parts || [];
+
+  const audioPart = parts.find(
+    part =>
+      part?.inlineData?.data ||
+      part?.inline_data?.data
+  );
+
+  if (!audioPart) {
+    throw new Error(
+      "TTS ei palauttanut audiota."
+    );
+  }
+
+  const audio =
+    audioPart.inlineData ||
+    audioPart.inline_data;
+
+  const pcmBase64 = audio.data;
+
+  if (!pcmBase64) {
+    throw new Error(
+      "TTS palautti tyhjän audiopayloadin."
+    );
+  }
+
+  /*
+   * Gemini TTS palauttaa PCM16 mono 24 kHz.
+   * Muutetaan se WAViksi, jotta Android/WebView
+   * pystyy soittamaan äänen suoraan.
+   */
+
+  const wavBase64 = pcm16Base64ToWavBase64(
+    pcmBase64,
+    24000,
+    1,
+    16
+  );
+
+  return {
+    mimeType: "audio/wav",
+    data: wavBase64
+  };
+}
+
+/*
+================================================================
+New function
+================================================================
+*/
+
+function pcm16Base64ToWavBase64(
+  base64,
+  sampleRate = 24000,
+  channels = 1,
+  bitsPerSample = 16
+) {
+  const binary = atob(base64);
+
+  const pcm = new Uint8Array(
+    binary.length
+  );
+
+  for (let i = 0; i < binary.length; i++) {
+    pcm[i] = binary.charCodeAt(i);
+  }
+
+  const bytesPerSample =
+    bitsPerSample / 8;
+
+  const blockAlign =
+    channels * bytesPerSample;
+
+  const byteRate =
+    sampleRate * blockAlign;
+
+  const dataSize =
+    pcm.length;
+
+  const buffer =
+    new ArrayBuffer(44 + dataSize);
+
+  const view =
+    new DataView(buffer);
+
+  const writeString = (
+    offset,
+    string
+  ) => {
+    for (
+      let i = 0;
+      i < string.length;
+      i++
+    ) {
+      view.setUint8(
+        offset + i,
+        string.charCodeAt(i)
+      );
+    }
+  };
+
+  writeString(0, "RIFF");
+
+  view.setUint32(
+    4,
+    36 + dataSize,
+    true
+  );
+
+  writeString(8, "WAVE");
+
+  writeString(12, "fmt ");
+
+  view.setUint32(
+    16,
+    16,
+    true
+  );
+
+  view.setUint16(
+    20,
+    1,
+    true
+  );
+
+  view.setUint16(
+    22,
+    channels,
+    true
+  );
+
+  view.setUint32(
+    24,
+    sampleRate,
+    true
+  );
+
+  view.setUint32(
+    28,
+    byteRate,
+    true
+  );
+
+  view.setUint16(
+    32,
+    blockAlign,
+    true
+  );
+
+  view.setUint16(
+    34,
+    bitsPerSample,
+    true
+  );
+
+  writeString(36, "data");
+
+  view.setUint32(
+    40,
+    dataSize,
+    true
+  );
+
+  new Uint8Array(
+    buffer,
+    44
+  ).set(pcm);
+
+  const bytes =
+    new Uint8Array(buffer);
+
+  let binaryOut = "";
+
+  const chunkSize = 0x8000;
+
+  for (
+    let i = 0;
+    i < bytes.length;
+    i += chunkSize
+  ) {
+    binaryOut += String.fromCharCode(
+      ...bytes.subarray(
+        i,
+        Math.min(
+          i + chunkSize,
+          bytes.length
+        )
+      )
+    );
+  }
+
+  return btoa(binaryOut);
+}
+
+
+/*
+================================================================
+IMAGE INPUTS
+================================================================
+*/
+
+function normalizeImageInputs(
+  body
+) {
+
+  const result = [];
+
+
+  const files =
+    body.files ||
+    body.imageFiles ||
+    [];
+
+
+  for (
+    const file of files
+  ) {
+
+    if (
+      file?.inlineData
+    ) {
+
+      result.push({
+
+        mimeType:
+          file.inlineData.mimeType ||
+          "image/jpeg",
+
+        data:
+          file.inlineData.data
+      });
+
+      continue;
+    }
+
+
+    if (
+      file?.data &&
+      file?.mimeType
+    ) {
+
+      result.push({
+
+        mimeType:
+          file.mimeType,
+
+        data:
+          file.data
+      });
+    }
+  }
+
+
+  if (
+    body.imageBase64
+  ) {
+
+    result.push({
+
+      mimeType:
+        body.imageMimeType ||
+        "image/jpeg",
+
+      data:
+        body.imageBase64
+    });
+  }
+
+
+  return result;
+}
+
+
+/*
+================================================================
+GOOGLE ACCESS TOKEN
+================================================================
+*/
+
+async function getGoogleAccessToken(
+  credentials
+) {
+
+  const now =
+    Math.floor(
+      Date.now() / 1000
+    );
+
+
+  const header = {
+    alg: "RS256",
+    typ: "JWT"
+  };
+
+
+  const payload = {
+
+    iss:
+      credentials.client_email,
+
+    scope:
+      "https://www.googleapis.com/auth/cloud-platform",
+
+    aud:
+      "https://oauth2.googleapis.com/token",
+
+    exp:
+      now + 3600,
+
+    iat:
+      now
+  };
+
+
+  const base64UrlEncode =
+    value => {
+
+      return btoa(
+        JSON.stringify(value)
+      )
+        .replace(/=/g, "")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_");
+    };
+
+
+  const unsignedToken =
+    `${base64UrlEncode(header)}.${base64UrlEncode(payload)}`;
+
+
+  const pem =
+    credentials.private_key
+      .replace(
+        "-----BEGIN PRIVATE KEY-----",
+        ""
+      )
+      .replace(
+        "-----END PRIVATE KEY-----",
+        ""
+      )
+      .replace(
+        /\s/g,
+        ""
+      );
+
+
+  const binary =
+    atob(pem);
+
+
+  const bytes =
+    new Uint8Array(
+      binary.length
+    );
+
+
+  for (
+    let i = 0;
+    i < binary.length;
+    i++
+  ) {
+
+    bytes[i] =
+      binary.charCodeAt(i);
+  }
+
+
+  const key =
+    await crypto.subtle.importKey(
+
+      "pkcs8",
+
+      bytes.buffer,
+
+      {
+        name:
+          "RSASSA-PKCS1-v1_5",
+
+        hash: {
+          name:
+            "SHA-256"
+        }
+      },
+
+      false,
+
+      ["sign"]
+    );
+
+
+  const signature =
+    await crypto.subtle.sign(
+
+      "RSASSA-PKCS1-v1_5",
+
+      key,
+
+      new TextEncoder()
+        .encode(unsignedToken)
+    );
+
+
+  const signatureB64 =
+    btoa(
+      String.fromCharCode(
+        ...new Uint8Array(
+          signature
+        )
+      )
+    )
+      .replace(/=/g, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
+
+
+  const jwt =
+    `${unsignedToken}.${signatureB64}`;
+
+
+  const response =
+    await fetch(
+      "https://oauth2.googleapis.com/token",
+      {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/x-www-form-urlencoded"
+        },
+
+        body:
+          `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer` +
+          `&assertion=${jwt}`
+      }
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if (
+    !response.ok ||
+    !data.access_token
+  ) {
+
+    const error =
+      new Error(
+        "Google access token epäonnistui: " +
+        JSON.stringify(data)
+      );
+
+    // @ts-ignore
+    error.status =
+      response.status;
+
+    throw error;
+  }
+
+
+  return data.access_token;
+}
+
+
+/*
+================================================================
+CORS
+================================================================
+*/
+
+function corsHeaders() {
+
+  return {
+
+    "Access-Control-Allow-Origin":
+      "*",
+
+    "Access-Control-Allow-Methods":
+      "POST, OPTIONS",
+
+    "Access-Control-Allow-Headers":
+      "Content-Type",
+
+    "Access-Control-Max-Age":
+      "86400"
+  };
+}
+
+
+/*
+================================================================
+JSON
+================================================================
+*/
+
+function json(
+  data,
+  status = 200
+) {
+
+  return new Response(
+
+    JSON.stringify(data),
+
+    {
+
+      status,
+
+      headers: {
+
+        ...corsHeaders(),
+
+        "Content-Type":
+          "application/json; charset=utf-8"
+      }
+    }
+  );
+}
